@@ -40,8 +40,12 @@ nav{
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     line-height: 1cm;
+    position: relative;
 }
-
+.conteiner__date{
+    position: absolute;
+    top: 0px;
+}
 h1 {
     text-align: center;
 }
@@ -52,5 +56,23 @@ h1 {
 .liturgia__title{
     font-size: 20pt;
     font-family: "Merriweather";
-    color: #000
+    color: #000;
+    font-weight: bold;
+}
+.center-text {
+    text-align: center;
+}
+@media (max-width: 600px) {
+    .container{
+        width: 400px;
+        height: 600px;
+    }
+}
+footer{
+    width: 100%;
+    flex: auto;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    gap: 10px;
 }

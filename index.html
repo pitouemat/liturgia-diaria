@@ -6,90 +6,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liturgia Diária</title>
     <link rel="stylesheet" href="index.css">
+    <script src="https://kit.fontawesome.com/669bcf34d7.js" crossorigin="anonymous"></script>
+
+
 </head>
 
 <body>
     <nav>
         <div class="title">
             <h2>SantoDia</h2>
-            <p id="datetime""></p>
+            <p id="datetime"></p>
         </div>
     </nav>
-    <div class=" container">
-            <h1>Liturgia Diária</h1>
-            <p id="liturgia">Carregando...</p>
+
+
+
+    <div class="container">
+        <h1>Liturgia Diária</h1>
+        <div class="conteiner__date">
+            <input type="date" id="date-picker">
+            <p id="selected-date"></p>
+        </div>
+        <p id="liturgia">Carregando...</p>
+
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const datePicker = document.getElementById("date-picker");
+            const liturgiaElement = document.getElementById("liturgia");
+            const datetimeElement = document.getElementById("datetime");
+
+            function updateDateTime() {
+                const now = new Date();
+                datetimeElement.textContent = now.toLocaleString();
+            }
+            setInterval(updateDateTime, 1000);
+            updateDateTime();
+
+            const now = new Date();
+            const hojeFormatada = now.toISOString().split('T')[0];
+            datePicker.value = hojeFormatada;
+
+            function fetchLiturgia(dia, mes) {
+                const url = `https://liturgia.up.railway.app/v2/?dia=${dia}&mes=${mes}`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.leituras) {
+                            liturgiaElement.textContent = "Liturgia não disponível.";
+                            return;
+                        }
+                        liturgiaElement.innerHTML = `
+                            <p class="center-text"><strong>${data.liturgia || "Liturgia não encontrada"}</strong></p>
+
+                            <p class="liturgia__title">Primeira Leitura</p>
+                            <p><strong>Referência:</strong> ${data.leituras.primeiraLeitura?.[0]?.referencia || "Não disponível"}</p>
+                            <p>${data.leituras.primeiraLeitura?.[0]?.texto || "Texto não disponível"}</p>
+
+                            <p class="liturgia__title">Salmo</p>
+                            <p><strong>Referência:</strong> ${data.leituras.salmo?.[0]?.referencia || "Não disponível"}</p>
+                            <p>${data.leituras.salmo?.[0]?.texto || "Texto não disponível"}</p>
+
+                            <p class="liturgia__title">Evangelho</p>
+                            <p><strong>Referência:</strong> ${data.leituras.evangelho?.[0]?.referencia || "Não disponível"}</p>
+                            <p>${data.leituras.evangelho?.[0]?.texto || "Texto não disponível"}</p>
+                        `;
+                    })
+                    .catch(error => {
+                        console.error("Erro ao buscar a liturgia:", error);
+                        liturgiaElement.textContent = "Erro ao carregar a liturgia.";
+                    });
+            }
+
+            fetchLiturgia(now.getDate(), now.getMonth() + 1);
+            datePicker.addEventListener("change", function () {
+                const selectedDate = new Date(this.value);
+                fetchLiturgia(selectedDate.getDate(), selectedDate.getMonth() + 1);
+            });
+        });
+    </script>
+
+    <footer>
+        <p>Matheus Aguiar</p>
+        <div class="social">
+            <a href="https://github.com/pitouemat" target="_blank"><i class="fab fa-github"
+                    style="color: #000000;"></i></a>
+            <a href="https://www.linkedin.com/in/matheusaguiarti/" target="_blank"><i class="fab fa-linkedin"
+                    style="color: #2e62c4;"></i></a>
         </div>
 
-        <label for="date-picker">Selecione uma data:</label>
-        <input type="date" id="date-picker">
-
-        <p id="selected-date"></p>
-
-
-        <script>
-          document.addEventListener("DOMContentLoaded", () => {
-        const now = new Date();
-        const day = now.getDate();
-        const month = now.getMonth() + 1;  // Janeiro é 0, então somamos 1
-
-        // Definir a data de hoje como padrão para o input
-        const hojeFormatada = now.toISOString().split('T')[0]; // Formata a data no formato YYYY-MM-DD
-        document.getElementById("date-picker").value = hojeFormatada;  // Define o valor do input como a data de hoje
-
-        // Função para atualizar a data e hora
-        function updateDateTime() {
-            const now = new Date();
-            const formattedDateTime = now.toLocaleString();  // Formato local de data e hora
-            document.getElementById('datetime').textContent = formattedDateTime;
-        }
-
-        updateDateTime();  // Atualiza imediatamente
-        setInterval(updateDateTime, 1000);  // Atualiza a cada segundo
-
-        // Função que vai buscar e exibir a liturgia com base na data escolhida
-        function fetchLiturgia(selectedDay, selectedMonth) {
-            const url = `https://liturgia.up.railway.app/v2/?dia=${selectedDay}&mes=${selectedMonth}`;
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("liturgia").innerHTML = `
-                        <strong><center><p>${data.liturgia}</p></center></strong>
-                        <p class="liturgia__title">${data.leituras.primeiraLeitura[0].titulo}</p>
-                        <strong><p>Referência: ${data.leituras.primeiraLeitura[0].referencia}</p></strong>
-                        <strong>${data.leituras.primeiraLeitura[0].texto}</strong>
-                        
-                        <br>
-                        <br><p class="liturgia__title">Salmo</p>
-                        <p>Referência: ${data.leituras.salmo[0].referencia}</p>
-                        <strong>${data.leituras.salmo[0].texto}</strong>
-                        
-                        <br>
-                        <br><p class="liturgia__title">Evangelho</p>
-                        <p>Referência: ${data.leituras.evangelho[0].referencia}</p>
-                        <strong>${data.leituras.evangelho[0].texto}</strong>
-                    `;
-                })
-                .catch(error => {
-                    console.error("Erro ao buscar a liturgia: ", error);
-                    document.getElementById("liturgia").textContent = "Erro ao carregar a liturgia.";
-                });
-        }
-
-        // Acionar a busca pela liturgia de hoje ao carregar a página
-        fetchLiturgia(day, month);
-
-        // Quando o usuário escolher uma data diferente
-        document.getElementById("date-picker").addEventListener("change", function () {
-            const selectedDate = new Date(this.value);
-            const selectedDay = selectedDate.getDate();
-            const selectedMonth = selectedDate.getMonth() + 1;
-
-            // Chama a função para buscar a liturgia com a nova data
-            fetchLiturgia(selectedDay, selectedMonth);
-        });
-    });
-        </script>
+    </footer>
 </body>
 
 </html>
