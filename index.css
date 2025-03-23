@@ -67,6 +67,9 @@ h1 {
         width: 400px;
         height: 600px;
     }
+    .container h1{
+        margin-top: 10px;
+    }
 }
 footer{
     width: 100%;
